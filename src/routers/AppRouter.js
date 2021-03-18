@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom'
-import { JournalScreen } from '../components/journal/JournalScreen'
-import { AuthRouter } from './AuthRouter'
-import { firebase } from '../firebase/firebaseConfig'
 import { useDispatch } from 'react-redux'
+import { BrowserRouter as Router, Redirect, Switch } from 'react-router-dom'
 import { login } from '../actions/auth'
-import { PublicRoute } from './PublicRoute'
+import { startLoadingNotes } from '../actions/notes'
+import { JournalScreen } from '../components/journal/JournalScreen'
+import { firebase } from '../firebase/firebaseConfig'
+import { AuthRouter } from './AuthRouter'
 import { PrivateRoute } from './PrivateRoute'
+import { PublicRoute } from './PublicRoute'
 
 export const AppRouter = () => {
 
@@ -17,10 +18,11 @@ export const AppRouter = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        firebase.auth().onAuthStateChanged((user) => {
+        firebase.auth().onAuthStateChanged(async (user) => {
             if (user?.uid) {
                 dispatch(login(user.uid, user.displayName));
                 setIsLoggedIn(true);
+                dispatch(startLoadingNotes(user.uid));
             } else {
                 setIsLoggedIn(false);
             }
@@ -30,7 +32,7 @@ export const AppRouter = () => {
 
     if (checking) {
         return (
-            <h1>Espere</h1>
+            <h1>Please wait</h1>
         )
     }
 
